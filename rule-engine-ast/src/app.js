@@ -91,6 +91,18 @@ app.get('/api/rules', async (req, res) => {
         res.status(500).json({ error: 'Error fetching rules', details: err.message });
     }
 }); 
+app.post('/api/rules/evaluate-combined', (req, res) => {
+    const { ast, data } = req.body;
+    console.log(ast);
+    console.log(data) ; 
+    try { 
+        const result = evaluateAST(ast, data);
+        res.json({ result });
+    } catch (error) {
+        console.log(error) ; 
+        res.status(400).json({ error: error.message });
+    }
+});
 
 const PORT = 5000;
 app.listen(PORT, () => {

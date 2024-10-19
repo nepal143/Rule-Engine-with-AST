@@ -3,7 +3,7 @@ const acorn = require('acorn');
 // Define the Node class for AST structure
 class Node {
     constructor(type, value = null, left = null, right = null) {
-        this.type = type;    // e.g., "operator" or "operand"
+        this.type = type;    // e.g., "BinaryExpression", "Identifier", "Literal"
         this.value = value;  // e.g., number for operands, operator for operators
         this.left = left;    // Left child (for binary operators)
         this.right = right;  // Right child (for binary operators)
@@ -19,9 +19,15 @@ function createAST(ruleString) {
 // Function to evaluate an AST
 function evaluateAST(ast, context) {
     const evaluateNode = (node) => {
+        console.log('Evaluating node:', JSON.stringify(node, null, 2));  // Log each node
         switch (node.type) {
             case 'BinaryExpression':
-                return applyOperator(node.operator, evaluateNode(node.left), evaluateNode(node.right));
+                // Check for operator in both 'value' and 'operator'
+                const operator = node.operator || node.value; // Use node.value if node.operator is not present
+                if (!operator) {
+                    throw new Error(`Missing operator in BinaryExpression node: ${JSON.stringify(node)}`);
+                }
+                return applyOperator(operator, evaluateNode(node.left), evaluateNode(node.right));
             case 'Identifier':
                 if (context[node.name] === undefined) {
                     throw new Error(`Missing attribute: ${node.name}`);
@@ -36,6 +42,8 @@ function evaluateAST(ast, context) {
 
     return evaluateNode(ast);
 }
+
+
 
 // Function to combine multiple ASTs
 function combineMultipleASTs(asts) {
@@ -83,4 +91,5 @@ function applyOperator(operator, left, right) {
     }
 }
 
+// Export the necessary functions
 module.exports = { evaluateAST, createAST, combineMultipleASTs };
